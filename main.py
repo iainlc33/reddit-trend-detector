@@ -363,18 +363,19 @@ TARGET: [If 8+, who specifically would buy this]"""
 
     def scan(self):
         """Main scanning function - collect all, then analyze best"""
-        print(f"Starting multi-path scan at {datetime.now()}")
-        print(f"Monitoring {len(self.MONITORING_SUBREDDITS)} subreddits")
-        print(f"Thresholds - High: {self.HIGH_VELOCITY_THRESHOLD}, Buying: {self.BUYING_SIGNAL_VELOCITY}, Normal: {self.NORMAL_VELOCITY}")
+        print(f"Starting multi-path scan at {datetime.now()}", flush=True)
+        print(f"Monitoring {len(self.MONITORING_SUBREDDITS)} subreddits", flush=True)
+        print(f"Thresholds - High: {self.HIGH_VELOCITY_THRESHOLD}, Buying: {self.BUYING_SIGNAL_VELOCITY}, Normal: {self.NORMAL_VELOCITY}", flush=True)
         
         # Collect ALL qualifying posts first
         all_candidates = []
         subreddits_checked = 0
         
-        print("Collecting posts from all subreddits...")
+        print("Collecting posts from all subreddits...", flush=True)
         
         for sub_name in self.MONITORING_SUBREDDITS:
             try:
+                print(f"  Checking r/{sub_name}...", flush=True)
                 subreddit = self.reddit.subreddit(sub_name)
                 subreddits_checked += 1
                 
@@ -420,16 +421,17 @@ TARGET: [If 8+, who specifically would buy this]"""
                 
                 # Progress indicator every 10 subreddits
                 if subreddits_checked % 10 == 0:
-                    print(f"  Checked {subreddits_checked}/{len(self.MONITORING_SUBREDDITS)} subreddits, found {len(all_candidates)} candidates")
+                    print(f"  Progress: Checked {subreddits_checked}/{len(self.MONITORING_SUBREDDITS)} subreddits, found {len(all_candidates)} candidates", flush=True)
                 
                 time.sleep(1)  # Reddit rate limiting between subreddits
                 
             except Exception as e:
-                print(f"Error scanning r/{sub_name}: {e}")
+                print(f"ERROR scanning r/{sub_name}: {e}", flush=True)
         
-        print(f"\nFinished collecting. Checked {subreddits_checked} subreddits, found {len(all_candidates)} total candidates")
+        print(f"\nFinished collecting. Checked {subreddits_checked} subreddits, found {len(all_candidates)} total candidates", flush=True)
         
         # Sort by priority (highest first)
+        print("Sorting candidates by priority...", flush=True)
         all_candidates.sort(key=lambda x: x['priority'], reverse=True)
         
         # Now analyze the TOP candidates
@@ -437,7 +439,7 @@ TARGET: [If 8+, who specifically would buy this]"""
         high_score_count = 0
         posts_by_path = {"high_velocity": 0, "buying_signals": 0, "normal": 0}
         
-        print(f"\nAnalyzing top {min(30, len(all_candidates))} candidates...")
+        print(f"\nAnalyzing top {min(30, len(all_candidates))} candidates...", flush=True)
         
         for candidate in all_candidates[:30]:  # Only analyze top 30
             post = candidate['post']
@@ -504,5 +506,8 @@ TARGET: [If 8+, who specifically would buy this]"""
 
 
 if __name__ == "__main__":
+    print("Script starting...", flush=True)
+    print("Creating detector instance...", flush=True)
     detector = RedditTrendDetector()
+    print("Starting scan...", flush=True)
     detector.scan()
