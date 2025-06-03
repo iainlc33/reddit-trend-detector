@@ -362,18 +362,21 @@ TARGET: [If 8+, who specifically would buy this]"""
         return 0
 
     def scan(self):
-        """Main scanning function - multi-path approach"""
+        """Main scanning function - collect all, then analyze best"""
         print(f"Starting multi-path scan at {datetime.now()}")
         print(f"Monitoring {len(self.MONITORING_SUBREDDITS)} subreddits")
         print(f"Thresholds - High: {self.HIGH_VELOCITY_THRESHOLD}, Buying: {self.BUYING_SIGNAL_VELOCITY}, Normal: {self.NORMAL_VELOCITY}")
         
-        analyzed_count = 0
-        high_score_count = 0
-        posts_by_path = {"high_velocity": 0, "buying_signals": 0, "normal": 0}
+        # Collect ALL qualifying posts first
+        all_candidates = []
+        subreddits_checked = 0
+        
+        print("Collecting posts from all subreddits...")
         
         for sub_name in self.MONITORING_SUBREDDITS:
             try:
                 subreddit = self.reddit.subreddit(sub_name)
+                subreddits_checked += 1
                 
                 # Check hot and rising
                 posts_to_check = []
@@ -399,57 +402,106 @@ TARGET: [If 8+, who specifically would buy this]"""
                         quick_buying_count, _ = self.check_buying_signals(quick_comments)
                         
                         if self.is_worth_analyzing(post, velocity, quick_buying_count > 0):
-                            # Get full comments for GPT analysis
-                            top_comments = post.comments[:10]
-                            buying_count, buying_examples = self.check_buying_signals(top_comments)
+                            # Determine priority score for sorting
+                            priority = velocity
+                            if quick_buying_count > 0:
+                                priority += 1000  # Boost posts with buying signals
                             
-                            # Determine which paths this qualifies under
-                            alert_paths = self.determine_alert_path(post, velocity, buying_count)
-                            
-                            if alert_paths:  # Qualified under at least one path
-                                # Analyze with GPT
-                                score, analysis, variations, target = self.analyze_with_gpt(
-                                    post, top_comments, buying_count, buying_examples, alert_paths
-                                )
-                                
-                                # Log the path
-                                if "HIGH VELOCITY" in alert_paths[0]:
-                                    posts_by_path["high_velocity"] += 1
-                                elif "BUYING SIGNALS" in alert_paths[0]:
-                                    posts_by_path["buying_signals"] += 1
-                                else:
-                                    posts_by_path["normal"] += 1
-                                
-                                # Alert for good scores (7+)
-                                if score >= 7:
-                                    self.send_discord_alert(post, velocity, score, analysis, variations, target, alert_paths)
-                                    high_score_count += 1
-                                
-                                # Log medium scores
-                                elif 6 <= score < 8:
-                                    print(f"   Medium potential ({score}/10) via {alert_paths[0]}: {post.title[:60]}")
-                                
-                                self.processed_posts.add(post.id)
-                                analyzed_count += 1
-                                
-                                # Rate limiting
-                                time.sleep(1)
-                                
-                                # Higher limit since we have more subreddits
-                                if analyzed_count >= 30:
-                                    print("Reached analysis limit for this run")
-                                    print(f"Posts by path: {posts_by_path}")
-                                    return
+                            # Add to candidates list
+                            all_candidates.append({
+                                'post': post,
+                                'velocity': velocity,
+                                'buying_signals': quick_buying_count,
+                                'priority': priority,
+                                'subreddit': sub_name
+                            })
                     
                     self.processed_posts.add(post.id)
+                
+                # Progress indicator every 10 subreddits
+                if subreddits_checked % 10 == 0:
+                    print(f"  Checked {subreddits_checked}/{len(self.MONITORING_SUBREDDITS)} subreddits, found {len(all_candidates)} candidates")
                 
                 time.sleep(1)  # Reddit rate limiting between subreddits
                 
             except Exception as e:
                 print(f"Error scanning r/{sub_name}: {e}")
         
-        print(f"Scan complete. Analyzed {analyzed_count} posts. Found {high_score_count} high-potential ideas.")
+        print(f"\nFinished collecting. Checked {subreddits_checked} subreddits, found {len(all_candidates)} total candidates")
+        
+        # Sort by priority (highest first)
+        all_candidates.sort(key=lambda x: x['priority'], reverse=True)
+        
+        # Now analyze the TOP candidates
+        analyzed_count = 0
+        high_score_count = 0
+        posts_by_path = {"high_velocity": 0, "buying_signals": 0, "normal": 0}
+        
+        print(f"\nAnalyzing top {min(30, len(all_candidates))} candidates...")
+        
+        for candidate in all_candidates[:30]:  # Only analyze top 30
+            post = candidate['post']
+            velocity = candidate['velocity']
+            
+            try:
+                # Get full comments for GPT analysis
+                post.comment_sort = 'top'
+                post.comments.replace_more(limit=0)
+                top_comments = post.comments[:10]
+                buying_count, buying_examples = self.check_buying_signals(top_comments)
+                
+                # Determine which paths this qualifies under
+                alert_paths = self.determine_alert_path(post, velocity, buying_count)
+                
+                if alert_paths:  # Should always have paths since we pre-filtered
+                    # Analyze with GPT
+                    score, analysis, variations, target = self.analyze_with_gpt(
+                        post, top_comments, buying_count, buying_examples, alert_paths
+                    )
+                    
+                    # Log the path
+                    if "HIGH VELOCITY" in alert_paths[0]:
+                        posts_by_path["high_velocity"] += 1
+                    elif "BUYING SIGNALS" in alert_paths[0]:
+                        posts_by_path["buying_signals"] += 1
+                    else:
+                        posts_by_path["normal"] += 1
+                    
+                    # Alert for good scores (7+)
+                    if score >= 7:
+                        self.send_discord_alert(post, velocity, score, analysis, variations, target, alert_paths)
+                        high_score_count += 1
+                    
+                    # Log medium scores
+                    elif 6 <= score < 7:
+                        print(f"   Medium potential ({score}/10) via {alert_paths[0]}: {post.title[:60]}")
+                    
+                    # Log lower scores too for visibility
+                    else:
+                        print(f"   Low potential ({score}/10): {post.title[:60]}")
+                    
+                    analyzed_count += 1
+                    
+                    # Rate limiting
+                    time.sleep(1)
+                    
+            except Exception as e:
+                print(f"Error analyzing post: {e}")
+        
+        # Summary statistics
+        print(f"\n=== SCAN COMPLETE ===")
+        print(f"Subreddits checked: {subreddits_checked}/{len(self.MONITORING_SUBREDDITS)}")
+        print(f"Total candidates found: {len(all_candidates)}")
+        print(f"Posts analyzed: {analyzed_count}")
+        print(f"High-potential ideas (7+): {high_score_count}")
         print(f"Posts by path: {posts_by_path}")
+        
+        # Show what we missed if any
+        if len(all_candidates) > 30:
+            print(f"\nTop 5 posts we didn't analyze:")
+            for i, candidate in enumerate(all_candidates[30:35]):
+                print(f"  {i+1}. Velocity: {candidate['velocity']:.0f}, Buying signals: {candidate['buying_signals']}, r/{candidate['subreddit']}")
+
 
 if __name__ == "__main__":
     detector = RedditTrendDetector()
