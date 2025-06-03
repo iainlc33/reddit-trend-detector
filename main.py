@@ -420,8 +420,8 @@ TARGET: [If 8+, who specifically would buy this]"""
                                 else:
                                     posts_by_path["normal"] += 1
                                 
-                                # ONLY alert for high scores (8+)
-                                if score >= 8:
+                                # Alert for good scores (7+)
+                                if score >= 7:
                                     self.send_discord_alert(post, velocity, score, analysis, variations, target, alert_paths)
                                     high_score_count += 1
                                 
