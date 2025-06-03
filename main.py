@@ -117,5 +117,3 @@ class RedditTrendDetector:
 if __name__ == "__main__":
     detector = RedditTrendDetector()
     detector.scan()
-      - key: MIN_VELOCITY
-        value: 1000
