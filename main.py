@@ -117,25 +117,5 @@ class RedditTrendDetector:
 if __name__ == "__main__":
     detector = RedditTrendDetector()
     detector.scan()
-
-# requirements.txt
-praw==7.7.1
-requests==2.31.0
-
-# render.yaml (place in repo root)
-services:
-  - type: cron
-    name: reddit-trend-detector
-    env: python
-    buildCommand: pip install -r requirements.txt
-    schedule: "*/10 * * * *"  # Every 10 minutes
-    command: python main.py
-    envVars:
-      - key: REDDIT_CLIENT_ID
-        sync: false
-      - key: REDDIT_CLIENT_SECRET
-        sync: false
-      - key: DISCORD_WEBHOOK
-        sync: false
       - key: MIN_VELOCITY
         value: 1000
