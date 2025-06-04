@@ -121,11 +121,16 @@ class RedditTrendDetector:
         
         for comment in comments:
             comment_lower = comment.body.lower()
-            if any(phrase in comment_lower for phrase in buying_phrases):
-                buying_count += 1
-                # Capture the comment as evidence
-                if len(quote_examples) < 3:
-                    quote_examples.append(comment.body[:100])
+if any(phrase in comment_lower for phrase in buying_phrases):
+    buying_count += 1
+    # Log which phrase matched
+    for phrase in buying_phrases:
+        if phrase in comment_lower:
+            print(f"   BUYING SIGNAL FOUND: '{phrase}' in comment: {comment.body[:150]}", flush=True)
+            break
+    # Capture the comment as evidence
+    if len(quote_examples) < 3:
+        quote_examples.append(comment.body[:100])
         
         return buying_count, quote_examples
 
