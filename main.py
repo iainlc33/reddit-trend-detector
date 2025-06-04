@@ -25,72 +25,53 @@ class RedditTrendDetector:
         self.BUYING_SIGNAL_VELOCITY = int(os.environ.get('BUYING_VELOCITY', '300'))
         self.NORMAL_VELOCITY = int(os.environ.get('NORMAL_VELOCITY', '600'))
         
-        # Massively expanded subreddit list
+        # Massively expanded subreddit list - focused on shirt-worthy content
         self.MONITORING_SUBREDDITS = [
-            # Major/Viral
-            'all', 'popular', 'bestof',
+            # High potential for shirt content
+            'targetedshirts', 'brandnewsentence', 'suspiciouslyspecific',
+            'showerthoughts', 'technicallythetruth', 'rareinsults',
             
-            # Meme/Humor
+            # Meme/Humor (but selective)
             'memes', 'dankmemes', 'me_irl', 'meirl', '2meirl4meirl',
-            'adviceanimals', 'funny', 'humor',
             
-            # Text-based gems
-            'brandnewsentence', 'suspiciouslyspecific', 'rareinsults',
-            'showerthoughts', 'unpopularopinion', 'crazyideas',
-            
-            # Cultural/Identity  
+            # Identity/Culture
             'blackpeopletwitter', 'whitepeopletwitter', 'scottishpeopletwitter',
-            'latinopeopletwitter', 'asianpeopletwitter',
+            'latinopeopletwitter', 
             
-            # Professional/Life
-            'antiwork', 'workreform', 'nursing', 'teachers', 'retailhell',
+            # Professional/Life identity
+            'antiwork', 'nursing', 'teachers', 'programmerhumor',
             'talesfromretail', 'talesfromyourserver', 'kitchenconfidential',
-            'programmerhumor', 'sysadmin', 'accounting',
+            
+            # Lifestyle/Hobbies
+            'gym', 'running', 'motorcycles', 'gaming', 'pcmasterrace',
             
             # Relationships/Life stages
-            'tinder', 'dating', 'marriage', 'parenting', 'daddit', 'mommit',
-            'childfree', 'teenagers', 'college',
+            'tinder', 'parenting', 'daddit', 'childfree',
             
-            # Sports (seasonal goldmines)
-            'nfl', 'nba', 'soccer', 'football', 'baseball', 'hockey',
-            'formula1', 'ufc', 'boxing', 'sports',
+            # Sports (focus on fan culture)
+            'nfl', 'nba', 'soccer', 'formula1',
             
-            # Gaming
-            'gaming', 'pcmasterrace', 'playstation', 'xbox', 'nintendoswitch',
+            # Weird/Niche movements
+            'birdsarentreal', 'giraffesdontexist', 'wyomingdoesntexist',
             
-            # Political/Movement
-            'politics', 'conservative', 'libertarian', 'politicalhumor',
-            'latestagecapitalism', 'aboringdystopia',
-            
-            # Regional/Local
-            'murica', 'straya', 'casualuk', 'britishproblems',
-            'canadians', 'ireland',
-            
-            # Fandoms (careful with copyright)
-            'freefolk', 'prequelmemes', 'lotrmemes', 'marvelmemes',
-            
-            # Reaction/Meta
+            # Good for phrases
             'murderedbywords', 'clevercomebacks', 'suicidebywords',
-            'technicallythetruth', 'holup',
+            'crazyideas', 'unpopularopinion',
             
-            # Finance/Crypto
-            'wallstreetbets', 'cryptocurrency', 'bitcoin', 'superstonk',
+            # Specific communities with merch culture
+            'wallstreetbets', 'superstonk', 'cryptocurrency',
             
-            # Hobbies/Interests
-            'fitness', 'gym', 'running', 'camping', 'gardening',
-            'cooking', 'motorcycles', 'cars',
-            
-            # Weird/Niche
-            'birdsarentreal', 'giraffesdontexist', 'wyomingdoesntexist'
+            # Avoid news/politics heavy subs
+            # Removed: politics, politicalhumor, news, worldnews, conservative, libertarian
         ]
         
         # Track processed posts
         self.processed_posts = set()
 
     def check_buying_signals(self, comments):
-        """Check if people are asking for this on a shirt"""
+        """Check if people are asking for this on a shirt - EXPANDED"""
         buying_phrases = [
-            # Shirt variations
+            # Direct shirt requests
             "on a shirt", "on a t-shirt", "on a tshirt", "on a t shirt",
             "on a tee", "on a tee shirt", "on a teeshirt", "on my shirt",
             "on my t-shirt", "on a tank", "on a hoodie", "on merch",
@@ -123,7 +104,16 @@ class RedditTrendDetector:
             
             # Gift ideas
             "getting this for", "buy this for my", "gift idea",
-            "perfect gift", "christmas gift", "birthday gift"
+            "perfect gift", "christmas gift", "birthday gift",
+            
+            # NEW: Identity/motto signals
+            "this is my motto", "my new motto", "life motto",
+            "stealing this", "using this", "my new philosophy",
+            "this is me", "literally me", "story of my life",
+            "personal attack", "i feel attacked", "calling me out",
+            "new favorite saying", "quote of the year",
+            "need this energy", "this energy", "mood",
+            "spirit animal", "my aesthetic", "vibe"
         ]
         
         buying_count = 0
@@ -200,20 +190,25 @@ Evaluate strictly:
 5. Is it original enough to not already be on 100 shirts?
 
 Consider these seller categories:
-- Political/social movements
+- Political/social movements (but not news headlines)
 - Professional pride/humor ("Trust me, I'm a nurse")
 - Generational identity  
 - Sports fan reactions
 - Relatable life statements
 - Counter-culture positions
+- Quirky philosophies
+- Internet culture references
 
-If people are explicitly asking for this on shirts in the comments, that's a STRONG positive signal!
+If people are using phrases like "this is my motto", "mood", "literally me", or asking for it on shirts, that's a STRONG signal!
 
-Score 1-10 (be harsh):
-1-5: Generic, won't sell
-6-7: Maybe niche appeal
-8-9: Strong seller potential
-10: Viral hit potential
+Remember: "Fucking around is ≥ finding out" is GREAT shirt material - clever wordplay with attitude.
+
+Score 1-10 (be fair but selective):
+1-3: Generic, news, or questions
+4-5: Okay phrase but not identity-driven
+6-7: Good potential, would appeal to niche
+8-9: Strong seller, clear identity/mood
+10: Viral hit potential, perfect shirt phrase
 
 Format:
 SCORE: [number]
@@ -320,7 +315,7 @@ TARGET: [If 8+, who specifically would buy this]"""
         print(f"{path_emoji} HIGH SCORE ALERT: {score}/10 via {alert_paths[0]} - {post.title[:50]}...")
 
     def is_worth_analyzing(self, post, velocity, has_buying_signals):
-        """Pre-filter with multiple paths"""
+        """Pre-filter with multiple paths - IMPROVED"""
         title_lower = post.title.lower()
         
         # Skip copyrighted brands
@@ -331,12 +326,29 @@ TARGET: [If 8+, who specifically would buy this]"""
             
         # Skip pure news/tragedy
         skip_terms = ['died', 'killed', 'arrested', 'convicted', 'sentenced',
-                      'breaking:', 'update:', 'megathread']
+                      'breaking:', 'update:', 'megathread', 'headline:']
         if any(term in title_lower for term in skip_terms):
             return False
             
         # Skip if too long for a shirt
         if len(post.title) > 100:
+            return False
+            
+        # NEW: Skip single word or very short titles
+        if len(post.title.split()) <= 2:
+            return False
+            
+        # NEW: Skip questions (usually not shirt material)
+        if post.title.strip().endswith('?') and any(q in title_lower for q in ['what', 'why', 'how', 'when', 'where', 'who']):
+            return False
+            
+        # NEW: Skip personal stories
+        if any(personal in title_lower for personal in ['my dad', 'my mom', 'my wife', 'my husband', 'my kid', 'my son', 'my daughter']):
+            return False
+            
+        # NEW: Skip if it's clearly a news article (contains common news site patterns)
+        news_patterns = ['judge finds', 'report:', 'study:', 'poll:', 'court rules', 'lawsuit', 'investigation']
+        if any(pattern in title_lower for pattern in news_patterns):
             return False
         
         # Multiple paths to qualify
@@ -382,8 +394,8 @@ TARGET: [If 8+, who specifically would buy this]"""
                 # Check hot and rising
                 posts_to_check = []
                 try:
-                    posts_to_check.extend(subreddit.hot(limit=10))
-                    posts_to_check.extend(subreddit.rising(limit=10))
+                    posts_to_check.extend(subreddit.rising(limit=15))
+                    posts_to_check.extend(subreddit.hot(limit=5))
                 except:
                     continue  # Skip if subreddit is inaccessible
                 
