@@ -415,7 +415,7 @@ TARGET: [If 8+, who specifically would buy this]"""
                         # Quick scan of top few comments
                         post.comment_sort = 'top'
                         post.comments.replace_more(limit=0)
-                        quick_comments = post.comments[:5]
+                        quick_comments = post.comments[:50]
                         
                         quick_buying_count, _ = self.check_buying_signals(quick_comments)
                         
@@ -466,7 +466,7 @@ TARGET: [If 8+, who specifically would buy this]"""
                 # Get full comments for GPT analysis
                 post.comment_sort = 'top'
                 post.comments.replace_more(limit=0)
-                top_comments = post.comments[:10]
+                top_comments = post.comments[:50]
                 buying_count, buying_examples = self.check_buying_signals(top_comments)
                 
                 # Determine which paths this qualifies under
