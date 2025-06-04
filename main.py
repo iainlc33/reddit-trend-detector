@@ -266,7 +266,7 @@ TARGET: [If 8+, who specifically would buy this]"""
                     elif line.startswith('TARGET:'):
                         target = line.split(':', 1)[1].strip()
                 
-                return score, analysis_text, variations, target
+                return score, analysis_text, variations, target, buying_examples
             else:
                 print(f"GPT API error: {response.status_code}")
                 return 0, "API error", "", ""
@@ -275,7 +275,7 @@ TARGET: [If 8+, who specifically would buy this]"""
             print(f"Error calling GPT: {e}")
             return 0, "Analysis failed", "", ""
 
-    def send_discord_alert(self, post, velocity, score, analysis, variations, target, alert_paths):
+    def send_discord_alert(self, post, velocity, score, analysis, variations, target, alert_paths, buying_count=0, buying_examples=None):
         """High-quality Discord alert for 8+ scores only"""
         # Emoji based on path
         path_emoji = "🔥"
@@ -313,6 +313,14 @@ TARGET: [If 8+, who specifically would buy this]"""
                 "value": target[:200], 
                 "inline": False
             })
+
+# Add buying signals if found
+if buying_count > 0 and buying_examples:
+    embed["embeds"][0]["fields"].append({
+        "name": "💬 Buying Signals Found", 
+        "value": "\n".join([f'> {ex[:100]}...' for ex in buying_examples[:3]]), 
+        "inline": False
+    })
         
         # Add link
         embed["embeds"][0]["fields"].append({
@@ -479,9 +487,9 @@ TARGET: [If 8+, who specifically would buy this]"""
                 
                 if alert_paths:  # Should always have paths since we pre-filtered
                     # Analyze with GPT
-                    score, analysis, variations, target = self.analyze_with_gpt(
-                        post, top_comments, buying_count, buying_examples, alert_paths
-                    )
+                   score, analysis, variations, target, buying_examples = self.analyze_with_gpt(
+    post, top_comments, buying_count, buying_examples, alert_paths
+)
                     
                     # Log the path
                     if "HIGH VELOCITY" in alert_paths[0]:
@@ -493,7 +501,7 @@ TARGET: [If 8+, who specifically would buy this]"""
                     
                     # Alert for good scores (7+)
                     if score >= 7:
-                        self.send_discord_alert(post, velocity, score, analysis, variations, target, alert_paths)
+                        self.send_discord_alert(post, velocity, score, analysis, variations, target, alert_paths, buying_count, buying_examples)
                         high_score_count += 1
                     
                     # Log medium scores
