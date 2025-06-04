@@ -69,70 +69,51 @@ class RedditTrendDetector:
         self.processed_posts = set()
 
     def check_buying_signals(self, comments):
-        """Check if people are asking for this on a shirt - EXPANDED"""
+        """Check for strong, merch-worthy buying signals only"""
         buying_phrases = [
-            # Direct shirt requests
-            "on a shirt", "on a t-shirt", "on a tshirt", "on a t shirt",
-            "on a tee", "on a tee shirt", "on a teeshirt", "on my shirt",
-            "on my t-shirt", "on a tank", "on a hoodie", "on merch",
-            
-            # Making/needing phrases
+            # Direct merch intent
+            "on a shirt", "on a t-shirt", "on a tee", "on my shirt",
             "make this a shirt", "make this a t-shirt", "make this a tee",
             "needs to be a shirt", "needs to be on a shirt",
-            "need this on a", "put this on a", "get this on a",
-            "someone make this", "someone put this", "please make this",
-            
-            # Wanting/buying phrases  
+            "put this on a shirt", "get this on a shirt",
+            "print this on merch", "make this merch", "needs to be merch",
+            "this is merch", "merch idea", "merch potential",
+            "put this on redbubble", "etsy worthy", "this is etsy-core",
+
+            # Purchase/intent
             "i'd wear", "would wear", "i'd buy", "would buy",
             "i'll take", "ill take", "i want this", "i need this",
-            "want one", "need one", "where can i", "where do i",
-            "take my money", "shut up and take", "throwing money",
-            
-            # Purchase intent
-            "10/10 would buy", "10/10 would wear", "would cop",
-            "instant buy", "instabuy", "insta buy", "buying this",
-            "link to buy", "link?", "w2c", "where to cop",
-            
-            # Merchandise specific
-            "merch idea", "merch potential", "merchandise this",
-            "this is merch", "perfect for merch", "great merch",
-            
-            # Wearing intent
-            "wear the shit out of", "wear the hell out of",
-            "wear this everywhere", "wear this daily",
-            "rock this", "sport this", "flex this",
-            
-            # Gift ideas
-            "getting this for", "buy this for my", "gift idea",
-            "perfect gift", "christmas gift", "birthday gift",
-            
-            # NEW: Identity/motto signals
-            "this is my motto", "my new motto", "life motto",
-            "stealing this", "using this", "my new philosophy",
-            "this is me", "literally me", "story of my life",
-            "personal attack", "i feel attacked", "calling me out",
-            "new favorite saying", "quote of the year",
-            "need this energy", "this energy", "mood",
-            "spirit animal", "my aesthetic", "vibe"
+            "i need this shirt", "i want to wear this",
+            "buying this", "buying this asap", "take my money",
+             "shut up and take my money", "take all my money",
+            "i'd pay for this", "how do i buy this", "is this for sale",
+            "add to cart", "where can i get one", "where can i buy this",
+
+            # Gift intent
+            "getting this for my", "perfect gift for a",
+            "i'm buying this for christmas", "gift idea", "birthday gift",
+            "this is going in my gift list",
+
+            # Funny meta-purchase thoughts
+            "would’ve worn this in high school",
+            "if this were a shirt, i’d be broke",
+            "already picturing this on a hoodie"
         ]
-        
+
         buying_count = 0
         quote_examples = []
-        
+
         for comment in comments:
-            comment_lower = comment.body.lower()
-            if any(phrase in comment_lower for phrase in buying_phrases):
+            text = comment.body.lower()
+            matched = next((phrase for phrase in buying_phrases if phrase in text), None)
+            if matched:
                 buying_count += 1
-                # Log which phrase matched
-                for phrase in buying_phrases:
-                    if phrase in comment_lower:
-                        print(f"   BUYING SIGNAL FOUND: '{phrase}' in comment: {comment.body[:150]}", flush=True)
-                        break
-                # Capture the comment as evidence
+                print(f"   BUYING SIGNAL FOUND: '{matched}' in comment: {comment.body[:150]}", flush=True)
                 if len(quote_examples) < 3:
                     quote_examples.append(comment.body[:100])
-        
+
         return buying_count, quote_examples
+
 
     def determine_alert_path(self, post, velocity, buying_count):
         """Determine which path qualifies this post"""
