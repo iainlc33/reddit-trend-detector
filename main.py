@@ -181,13 +181,18 @@ Upvotes: {post.score:,}
 Top comments:
 {comment_context}
 
-Evaluate strictly:
+Evaluate strictly BY THESE CRITERIA:
 
 1. Can this stand alone on a shirt without explanation?
-2. Does it express strong identity, belief, or emotion that someone would PAY to wear?
-3. Is it a movement, rallying cry, or cultural statement (like "Let's Go Brandon", "Birds Aren't Real", "Diamond Hands")?
-4. Would someone still understand and want this in 3-6 months?
-5. Is it original enough to not already be on 100 shirts?
+2. Would someone wear this to signal who they are, what they believe, or how they feel?
+3. Does it hit at least ONE of these:
+   - Movement/rallying cry ("Let's Go Brandon")
+   - Relatable struggle ("Running on coffee and anxiety")
+   - Identity/lifestyle flex ("Plant dad")
+   - Mood/attitude ("Not today, Satan")
+   - Clever wordplay ("Fucking around is ≥ finding out")
+   - Niche insider humor (programmer jokes, nurse life)
+4. Avoid only if it's extremely generic (Live Laugh Love) or exact copies of overdone shirts. Clever variations on trending phrases are GOOD - prioritize current relevance over timeless appeal.
 
 Consider these seller categories:
 - Political/social movements (but not news headlines)
