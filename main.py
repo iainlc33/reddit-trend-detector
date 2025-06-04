@@ -314,20 +314,20 @@ TARGET: [If 8+, who specifically would buy this]"""
                 "inline": False
             })
 
-# Add buying signals if found
-if buying_count > 0 and buying_examples:
-    embed["embeds"][0]["fields"].append({
-        "name": "💬 Buying Signals Found", 
-        "value": "\n".join([f'> {ex[:100]}...' for ex in buying_examples[:3]]), 
-        "inline": False
-    })
+        # Add buying signals if found
+        if buying_count > 0 and buying_examples:
+            embed["embeds"][0]["fields"].append({
+                "name": "💬 Buying Signals Found", 
+                "value": "\n".join([f'> {ex[:100]}...' for ex in buying_examples[:3]]), 
+                "inline": False
+            })
         
         # Add link
-        embed["embeds"][0]["fields"].append({
-            "name": "Source", 
-            "value": f"[View on Reddit](https://reddit.com{post.permalink})", 
-            "inline": False
-        })
+            embed["embeds"][0]["fields"].append({
+                "name": "Source", 
+                "value": f"[View on Reddit](https://reddit.com{post.permalink})", 
+                "inline": False
+            })
         
         requests.post(self.DISCORD_WEBHOOK, json=embed)
         print(f"{path_emoji} HIGH SCORE ALERT: {score}/10 via {alert_paths[0]} - {post.title[:50]}...")
