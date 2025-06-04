@@ -121,16 +121,16 @@ class RedditTrendDetector:
         
         for comment in comments:
             comment_lower = comment.body.lower()
-if any(phrase in comment_lower for phrase in buying_phrases):
-    buying_count += 1
-    # Log which phrase matched
-    for phrase in buying_phrases:
-        if phrase in comment_lower:
-            print(f"   BUYING SIGNAL FOUND: '{phrase}' in comment: {comment.body[:150]}", flush=True)
-            break
-    # Capture the comment as evidence
-    if len(quote_examples) < 3:
-        quote_examples.append(comment.body[:100])
+            if any(phrase in comment_lower for phrase in buying_phrases):
+                buying_count += 1
+                # Log which phrase matched
+                for phrase in buying_phrases:
+                    if phrase in comment_lower:
+                        print(f"   BUYING SIGNAL FOUND: '{phrase}' in comment: {comment.body[:150]}", flush=True)
+                        break
+                # Capture the comment as evidence
+                if len(quote_examples) < 3:
+                    quote_examples.append(comment.body[:100])
         
         return buying_count, quote_examples
 
@@ -269,11 +269,11 @@ TARGET: [If 8+, who specifically would buy this]"""
                 return score, analysis_text, variations, target, buying_examples
             else:
                 print(f"GPT API error: {response.status_code}")
-                return 0, "API error", "", ""
+                return 0, "API error", "", "", buying_examples
                 
         except Exception as e:
             print(f"Error calling GPT: {e}")
-            return 0, "Analysis failed", "", ""
+            return 0, "Analysis failed", "", "", buying_examples
 
     def send_discord_alert(self, post, velocity, score, analysis, variations, target, alert_paths, buying_count=0, buying_examples=None):
         """High-quality Discord alert for 8+ scores only"""
@@ -313,7 +313,7 @@ TARGET: [If 8+, who specifically would buy this]"""
                 "value": target[:200], 
                 "inline": False
             })
-
+        
         # Add buying signals if found
         if buying_count > 0 and buying_examples:
             embed["embeds"][0]["fields"].append({
@@ -323,11 +323,11 @@ TARGET: [If 8+, who specifically would buy this]"""
             })
         
         # Add link
-            embed["embeds"][0]["fields"].append({
-                "name": "Source", 
-                "value": f"[View on Reddit](https://reddit.com{post.permalink})", 
-                "inline": False
-            })
+        embed["embeds"][0]["fields"].append({
+            "name": "Source", 
+            "value": f"[View on Reddit](https://reddit.com{post.permalink})", 
+            "inline": False
+        })
         
         requests.post(self.DISCORD_WEBHOOK, json=embed)
         print(f"{path_emoji} HIGH SCORE ALERT: {score}/10 via {alert_paths[0]} - {post.title[:50]}...")
@@ -487,9 +487,9 @@ TARGET: [If 8+, who specifically would buy this]"""
                 
                 if alert_paths:  # Should always have paths since we pre-filtered
                     # Analyze with GPT
-                   score, analysis, variations, target, buying_examples = self.analyze_with_gpt(
-    post, top_comments, buying_count, buying_examples, alert_paths
-)
+                    score, analysis, variations, target, buying_examples = self.analyze_with_gpt(
+                        post, top_comments, buying_count, buying_examples, alert_paths
+                    )
                     
                     # Log the path
                     if "HIGH VELOCITY" in alert_paths[0]:
