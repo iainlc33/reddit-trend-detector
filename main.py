@@ -70,35 +70,38 @@ class RedditTrendDetector:
 
     def check_buying_signals(self, comments):
         """Check for strong, merch-worthy buying signals only"""
+
         buying_phrases = [
-            # Direct merch intent
-            "on a shirt", "on a t-shirt", "on a tee", "on my shirt",
-            "make this a shirt", "make this a t-shirt", "make this a tee",
-            "needs to be a shirt", "needs to be on a shirt",
-            "put this on a shirt", "get this on a shirt",
-            "print this on merch", "make this merch", "needs to be merch",
-            "this is merch", "merch idea", "merch potential",
-            "put this on redbubble", "etsy worthy", "this is etsy-core",
-
-            # Purchase/intent
-            "i'd wear", "would wear", "i'd buy", "would buy",
-            "i'll take", "ill take", "i want this", "i need this",
-            "i need this shirt", "i want to wear this",
-            "buying this", "buying this asap", "take my money",
-             "shut up and take my money", "take all my money",
-            "i'd pay for this", "how do i buy this", "is this for sale",
-            "add to cart", "where can i get one", "where can i buy this",
-
+            # Explicit product intent
+            "on a shirt", "on a t-shirt", "on a tshirt", "on a tee", "on a tee shirt", "on a teeshirt", "on my shirt",
+            "make this a shirt", "make this a t-shirt", "make this a tshirt", "make this a tee",
+            "put this on a shirt", "put this on a t-shirt", "put this on a tshirt", "put this on a tee",
+            "print this on a shirt", "print this on a t-shirt", "print this on a tshirt",
+            "slap this on a shirt", "slap this on a t-shirt", "slap this on a tee",
+            "needs to be a shirt", "needs to be on a shirt", "needs to be on a tee",
+            "why isn't this a shirt", "why is this not merch", "should be merch", "make this real",
+    
+            # Merch-related intent
+            "this is merch", "merch idea", "merch potential", "this is merch material",
+            "print this on merch", "put this on merch", "make this merch",
+            "needs to be merch", "perfect for merch", "great merch", "etsy worthy", "this is etsy-core",
+    
+            # Strong buying intent
+            "i want this", "i need this", "i need this shirt", "i want to wear this", "i'm buying this",
+            "buying this", "buying this asap", "take my money", "shut up and take my money",
+            "take all my money", "i'd pay for this", "how do i buy this", "is this for sale",
+            "where can i buy this", "where can i get one", "add to cart",
+    
             # Gift intent
-            "getting this for my", "perfect gift for a",
-            "i'm buying this for christmas", "gift idea", "birthday gift",
-            "this is going in my gift list",
+            "getting this for my", "buy this for my", "perfect gift for a", "gift idea", "birthday gift",
+            "i'm buying this for christmas", "this is going in my gift list",
 
-            # Funny meta-purchase thoughts
-            "would’ve worn this in high school",
-            "if this were a shirt, i’d be broke",
-            "already picturing this on a hoodie"
+            # Meta/funny ownership expressions
+            "wish this was real", "already picturing this on a hoodie",
+            "would’ve worn this in high school", "if this were a shirt, i’d be broke",
+            "i'd wear the hell out of this", "i'd wear the shit out of this", "i'd wear this every day"
         ]
+
 
         buying_count = 0
         quote_examples = []
